@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <?!= HtmlService.createHtmlOutputFromFile('css').getContent(); ?>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300" type="text/css" />
+    <title>全件表示にしようと思った</title>
+    <script>
+
+        function preventFormSubmit() {
+            var forms = document.querySelectorAll('form');
+            for (var i = 0; i < forms.length; i++) {
+                forms[i].addEventListener('submit', function (event) {
+                    event.preventDefault();
+                });
+            }
+            //.gs内のloading()を呼び出し、読み込み後にListBack()でselect要素に選択肢を設定します。
+            google.script.run.withSuccessHandler(ListBack).loading();
+        }
+
+        window.addEventListener('load', preventFormSubmit);
+
+        //フォームなのでsubmit後の挙動を書く関数（今回は省略）
+        function handleFormSubmit(formObject) {
+            var div = document.getElementById('output');
+            div.innerHTML = "送信完了";
+        }
+
+        //リスト読み込み
+        function ListBack(data) {
+            //他関数でも読めるようにグローバル変数としてセット
+            listdata = data;
+            var list = document.getElementById('list');
+            for (var i = 0; i < data.length; i++) {
+                var option = document.createElement('option');
+                option.setAttribute('value', data[i][1]);
+                option.innerHTML = data[i][1];
+                list.appendChild(option);
+            }
+        }
+
+        //動的にリスト情報を表示
+        function addElement(select) {
+
+            //該当行を探すためのforループ。iで保持します。
+            for (var i = 0; i < listdata.length; i++) {
+                if (select.value == listdata[i][1]) {
+                    break;
+                }
+            }
+            var element = document.createElement('div');
+            var obj = document.getElementById("information");
+            var division = obj.getElementsByTagName('div');
+            //例えばAさん→Bさんと選択を変えたときにdiv内にAさんの情報が残らないようにする
+
+            if (division.length > 0) {
+                obj.removeChild(division[0]);
+            }
+
+            element.class = "information";
+            element.innerHTML = "<br>URL(リンク)：\n" + listdata[i][2];
+            obj.appendChild(element);
+        }
+
+    </script>
+</head>
+
+<body>
+    <form>
+        <h120>
+            <div id="information"></div>
+        </h120>
+
+        <div id="container">
+            <h3>Search for BackLog</h3>
+        </div>
+        <h1>あなたの探している最高の項目を見つけてください</h1><br>
+
+        <form action="cgi-bin/example.cgi" method="post">
+            <p>単語で検索する</p>
+            <input type="search" name="search" placeholder="キーワードを入力">
+            <input type="submit" name="submit" value="検索"><br>
+        </form>
+
+        <INPUT type="submit" name="botan1" value="BackLogで自分で探す">
+
+        <h44>
+            <select id="list" name="list" onchange="addElement(this);" required><br>
+                <option value="">
+                </option>
+            </select>
+        </h44>
+
+        <!--
+        <div id="social-platforms">
+
+        <a class="btn btn-icon btn-facebook" href="#"><i class="fa fa-facebook"></i><span>Facebook</span></a>
+        <a class="btn btn-icon btn-twitter" href="#"><i class="fa fa-twitter"></i><span>Twitter</span></a>
+        <a class="btn btn-icon btn-googleplus" href="#"><i class="fa fa-google-plus"></i><span>Google+</span></a>
+        <a class="btn btn-icon btn-pinterest" href="#"><i class="fa fa-pinterest"></i><span>Pinterest</span></a>
+        <a class="btn btn-icon btn-linkedin" href="#"><i class="fa fa-linkedin"></i><span>LinkedIn</span></a>
+        </div>
+        -->
+
+
+    </form>
+</body>
+
+</html>
